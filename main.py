@@ -40,18 +40,6 @@ class Market:
         self.ssl_wraper.close()
 
 
-    def _coin_info(self, crncy1, crncy2):
-        self.ssl_wraper.sendall("GET /api/v1/ticker?symbol="+crncy1+"_"+crncy2+" HTTP/1.1\r\nHost: "+self.address+"\r\nConnection: keep-alive\r\n\r\n")
-
-        resp = self.ssl_wraper.recv(4096)
-        if not resp:
-            print("Failed to obtain info about "+crncy1+" relative to "+crncy2)
-            self.ssl_wraper.close()
-            return
-
-        print resp
-
-
     def query_market(self, query):
         self.ssl_wraper.sendall(query)
 
