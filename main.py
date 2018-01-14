@@ -13,6 +13,8 @@ class QueryType(Enum):
     PRICE_TICKER = 1
     MARKET_DEPTH = 2
     TRADE_SELL = 3   # amount api_key price sign symbol type
+    TRADE_BUY = 4
+    TRADE_CANCEL = 5
 
 
 # Build API query for market
@@ -28,7 +30,11 @@ class QueryBuilder():
         if qtype == QueryType.PRICE_TICKER:
             return "GET /api/v1/ticker?symbol="+arg[0]+"_"+arg[1]+" HTTP/1.1\r\nHost: "+market+"\r\nConnection: keep-alive\r\n\r\n"
         elif qtype == QueryType.TRADE_SELL:
-            return "POST /api/v1/trade\r\nHost: "+market+"\r\n\r\namount="+arg[0]+"&
+            return "POST /api/v1/trade\r\nHost: "+market+"\r\n\r\namount="+arg[0]+"&api_key="+arg[1]+"&price="+arg[2]+"&sign="+arg[3]+"&symbol="+arg[4]+"&type=sell"
+        elif qtype == QueryType.TRADE_BUY:
+            raise "QueryType.TRADE_BUY unimplementd"
+        elif qtype == QueryType.TRADE_CANCEL:
+            return "QueryType.TRADE_CANCEL unimplementd"
 
 
 # Represents market and holds functionality for comunincating with market
@@ -108,27 +114,40 @@ class Market:
 
         return info['ticker']['last']
 
+
     # Sell security at given price or with current price
     #
     # Arguments:
-    #   what - Three letter symbol of currency
+    #   what - Three letter symbol of currency which should be sold
     #   amount - amount of security to be sold
-    #   at_price - price at which security should be sold. If 0 if will be sold with current price
+    #   at_price - price at which security should be sold. If 0 it will be sold with current price
     # Return:
-    #   bool value - True: Transaction was succesfuly placed
-    #                False: Transaction was not succesfuly placed.
+    #   On sucess: Order id in string format
+    #   On failure: None
     def sell(self, what, amount, at_price=0):
         if at_price == 0:
             at_price = self.last_price(what)
             if not at_price:
-                return False
-        q = self.market_query.build(self.address, QueryType.TRADE_SELL, what, amount, at_price)
+                return None
+
+        # TODO sign quey with secret_key
+        q = self.market_query.build(self.address, QueryType.TRADE_SELL, amount, self.api_key, at_price, "TODO sign", what)
         response = self.query_market(q)
 
         if not response or response['result'] == "false":
-            return False
+            return None
         else:
-            return True
+            return response['order_id']
+
+
+    def buy(self):
+        raise "buy unimplementd"
+
+
+    def cancel(self, api_key, order_id, sign, symbol):
+        raise "cancel unimplementd"
+
+
 
 #######################
 #        MAIN         #
