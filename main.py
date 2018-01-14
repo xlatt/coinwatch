@@ -60,9 +60,9 @@ class Market:
     #   On sucess:  resp - Parsed response without HTTP headers
     #   On fail:    None
     def query_market(self, query):
-        self.ssl_wraper.sendall(query)
+        self.ssl_wraper.sendall(query.encode())
 
-        resp = self.ssl_wraper.recv(4096)
+        resp = self.ssl_wraper.recv(4096).decode()
         if not resp:
             print("Market "+self.address+" did not respod for query: "+query)
             self.ssl_wraper.close()
@@ -77,26 +77,27 @@ class Market:
     # API reference: https://api.allcoin.com/api/v1/ticker
     #
     # Arguments:
-    #   coin - String containing 3 letter identifier of currency
+    #   cofi - Currency of Interest. For this currency we want String containing 3 letter identifier of currency
     # Return:
-    #   JSON formated currency info
+    #   JSON parsed to python dictionary
     #   For more info see: https://www.allcoin.com/About/APIReference/
-    def currency_info(self, coin):
+    def currency_info(self, cofi, ctoc):
+        q = self.market_query.build(self.address, QueryType.PRICE_TICKER, cofi, ctoc)
+        return self.query_market(q)
+
+
+    def last_price(self, coin):
+        info = None
         if coin in main_coins:
-            q = self.market_query.build(self.address, QueryType.PRICE_TICKER, coin, "usd")
-            self.query_market(q)
+            info = self.currency_info(coin, "usd")
         elif coin in alt_coins:
-            q = self.market_query.build(self.address, QueryType.PRICE_TICKER, coin, "btc")
-            self.query_market(q)
-
-
-    def last_price(self, coin_info):
-        raise "last price unimplemented"
+            info = self.currency_info(coin, "btc")
+        print(info['ticker']['sell'])
 
 
 #######################
 #        MAIN         #
 #######################
 m = Market("api.allcoin.com", "", "")
-m.currency_info("btc")
-m.currency_info("hpb")
+m.last_price("btc")
+m.last_price("hpb")
