@@ -2,10 +2,11 @@
 import ssl
 import socket
 import json
+import avgTransactionFee
 from enum import Enum
 
 main_currency = ["BTC", "btc", "ETH", "eth"]
-alt_currency  = ["HPB", "hpb"]
+alt_currency = ["HPB", "hpb"]
 
 
 # Query types for which QueryBuilder can build API queries
@@ -26,18 +27,18 @@ class QueryBuilder():
     #   query in string format
     def build(self, market, qtype, *arg):
         if qtype == QueryType.PRICE_TICKER:
-            return "GET /api/v1/ticker?symbol="+arg[0]+"_"+arg[1]+" HTTP/1.1\r\nHost: "+market+"\r\nConnection: keep-alive\r\n\r\n"
+            return "GET /api/v1/ticker?symbol=" + arg[0] + "_" + arg[
+                1] + " HTTP/1.1\r\nHost: " + market + "\r\nConnection: keep-alive\r\n\r\n"
 
 
 # Represents market and holds functionality for comunincating with market
 class Market:
-    tcp_socket      = 0
-    ssl_wraper      = 0
-    address         = ""
-    api_key         = ""
-    secret_key      = ""
-    market_query    = None
-
+    tcp_socket = 0
+    ssl_wraper = 0
+    address = ""
+    api_key = ""
+    secret_key = ""
+    market_query = None
 
     def __init__(self, address, api_key, secret_key):
         self.address = address
@@ -47,12 +48,11 @@ class Market:
 
         self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tcp_socket.connect((self.address, 443))
-        self.ssl_wraper = ssl.wrap_socket(self.tcp_socket, keyfile=None, certfile=None, server_side=False, cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_SSLv23)
-
+        self.ssl_wraper = ssl.wrap_socket(self.tcp_socket, keyfile=None, certfile=None, server_side=False,
+                                          cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_SSLv23)
 
     def __del__(self):
         self.ssl_wraper.close()
-
 
     # Send API query to market and parse response
     # Arguments:
@@ -65,14 +65,13 @@ class Market:
 
         resp = self.ssl_wraper.recv(4096).decode()
         if not resp:
-            print("Market "+self.address+" did not respod for query: "+query)
+            print("Market " + self.address + " did not respod for query: " + query)
             self.ssl_wraper.close()
             return None
 
         header_delim = resp.find("\r\n\r\n")
-        payload = resp[header_delim+4:]
+        payload = resp[header_delim + 4:]
         return json.loads(payload)
-
 
     # Get currency info
     # API reference: https://api.allcoin.com/api/v1/ticker
@@ -88,7 +87,6 @@ class Market:
         q = self.market_query.build(self.address, QueryType.PRICE_TICKER, cofi, ctoc)
         return self.query_market(q)
 
-
     def last_price(self, currency):
         info = None
         if currency in main_currency:
@@ -96,7 +94,7 @@ class Market:
         elif currency in alt_currency:
             info = self.currency_info(currency, "btc")
         else:
-            print("Unknow currency: "+currency)
+            print("Unknow currency: " + currency)
             return None
 
         return info['ticker']['last']
@@ -116,3 +114,5 @@ if p:
     print(p)
 
 m.last_price("dfsdf")
+
+fee = avgTransactionFee.ConnectToTransactionFeeServer("bitinfocharts.com")
