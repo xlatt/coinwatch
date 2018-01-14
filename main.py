@@ -1,6 +1,7 @@
 #!/bin/env python
 import ssl
 import socket
+import json
 from enum import Enum
 
 main_coins  = ["BTC", "btc", "ETH", "eth"]
@@ -66,8 +67,10 @@ class Market:
             print("Market "+self.address+" did not respod for query: "+query)
             self.ssl_wraper.close()
             return None
-        # todo strip http header and return
-        print resp
+
+        header_delim = resp.find("\r\n\r\n")
+        payload = resp[header_delim+4:]
+        return json.loads(payload)
 
 
     # Get currency info
