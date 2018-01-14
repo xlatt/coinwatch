@@ -53,6 +53,7 @@ class Market:
     def __del__(self):
         self.ssl_wraper.close()
 
+
     # Send API query to market and parse response
     # Arguments:
     #   query - String query obtained from QueryBuilder.build()
@@ -77,7 +78,9 @@ class Market:
     # API reference: https://api.allcoin.com/api/v1/ticker
     #
     # Arguments:
-    #   cofi - Currency of Interest. For this currency we want String containing 3 letter identifier of currency
+    #   cofi - Currency of Interest. For this currency we want statistics
+    #   cotc - Currency to compare. Currency stats will be comapred against this currency
+    #   both arguments cotains 3 letter identifier (usd, btc, ltc, ...)
     # Return:
     #   JSON parsed to python dictionary
     #   For more info see: https://www.allcoin.com/About/APIReference/
