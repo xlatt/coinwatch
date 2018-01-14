@@ -12,6 +12,7 @@ alt_currency  = ["HPB", "hpb"]
 class QueryType(Enum):
     PRICE_TICKER = 1
     MARKET_DEPTH = 2
+    TRADE_SELL = 3   # amount api_key price sign symbol type
 
 
 # Build API query for market
@@ -26,6 +27,8 @@ class QueryBuilder():
     def build(self, market, qtype, *arg):
         if qtype == QueryType.PRICE_TICKER:
             return "GET /api/v1/ticker?symbol="+arg[0]+"_"+arg[1]+" HTTP/1.1\r\nHost: "+market+"\r\nConnection: keep-alive\r\n\r\n"
+        elif qtype == QueryType.TRADE_SELL:
+            return "POST /api/v1/trade\r\nHost: "+market+"\r\n\r\namount="+arg[0]+"&
 
 
 # Represents market and holds functionality for comunincating with market
@@ -46,7 +49,7 @@ class Market:
 
         self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tcp_socket.connect((self.address, 443))
-        self.ssl_wraper = ssl.wrap_socket(self.tcp_socket, keyfile=None, certfile=None, server_side=False, cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_SSLv23)
+        self.ssl_wraper = ssl.wrap_socket(self.tcp_socket, keyfile=None, certfile=None, server_side=False, cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_TLSv1_2)
 
 
     def __del__(self):
@@ -105,6 +108,27 @@ class Market:
 
         return info['ticker']['last']
 
+    # Sell security at given price or with current price
+    #
+    # Arguments:
+    #   what - Three letter symbol of currency
+    #   amount - amount of security to be sold
+    #   at_price - price at which security should be sold. If 0 if will be sold with current price
+    # Return:
+    #   bool value - True: Transaction was succesfuly placed
+    #                False: Transaction was not succesfuly placed.
+    def sell(self, what, amount, at_price=0):
+        if at_price == 0:
+            at_price = self.last_price(what)
+            if not at_price:
+                return False
+        q = self.market_query.build(self.address, QueryType.TRADE_SELL, what, amount, at_price)
+        response = self.query_market(q)
+
+        if not response or response['result'] == "false":
+            return False
+        else:
+            return True
 
 #######################
 #        MAIN         #
