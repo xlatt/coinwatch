@@ -16,7 +16,6 @@ class QueryType(Enum):
 
 # Build API query for market
 class QueryBuilder():
-
     # Build API query
     # Arguments:
     #   market - address on which market will respond for API query
@@ -80,7 +79,7 @@ class Market:
     # Arguments:
     #   cofi - Currency of Interest. For this currency we want statistics
     #   cotc - Currency to compare. Currency stats will be comapred against this currency
-    #   both arguments cotains 3 letter identifier (usd, btc, ltc, ...)
+    #   both arguments cotains 3 letter identifier (btc, ltc, hpb, usd, ...)
     # Return:
     #   JSON parsed to python dictionary
     #   For more info see: https://www.allcoin.com/About/APIReference/
@@ -88,7 +87,12 @@ class Market:
         q = self.market_query.build(self.address, QueryType.PRICE_TICKER, cofi, ctoc)
         return self.query_market(q)
 
-
+    # Get last price of currency from market.
+    #
+    # Argument:
+    #   currency - three letter identifier of currency (btc, ltc, hpb, ...)
+    # Return:
+    #   Last price of currency compared to USD or Bitcoin. Values is float.
     def last_price(self, currency):
         info = None
         if currency in main_currency:
