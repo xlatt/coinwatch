@@ -89,12 +89,16 @@ class Market:
         return self.query_market(q)
 
 
-    def last_price(self, coin):
+    def last_price(self, currency):
         info = None
         if coin in main_coins:
-            info = self.currency_info(coin, "usd")
+            info = self.currency_info(currency, "usd")
         elif coin in alt_coins:
-            info = self.currency_info(coin, "btc")
+            info = self.currency_info(currency, "btc")
+        else:
+            print("Unknow currency: "+currency)
+            return
+
         print(info['ticker']['last'])
 
 
