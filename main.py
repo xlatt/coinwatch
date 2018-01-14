@@ -4,8 +4,8 @@ import socket
 import json
 from enum import Enum
 
-main_coins  = ["BTC", "btc", "ETH", "eth"]
-alt_coins   = ["HPB", "hpb"]
+main_currency = ["BTC", "btc", "ETH", "eth"]
+alt_currency  = ["HPB", "hpb"]
 
 
 # Query types for which QueryBuilder can build API queries
@@ -91,20 +91,20 @@ class Market:
 
     def last_price(self, currency):
         info = None
-        if coin in main_coins:
+        if currency in main_currency:
             info = self.currency_info(currency, "usd")
-        elif coin in alt_coins:
+        elif currency in alt_currency:
             info = self.currency_info(currency, "btc")
         else:
             print("Unknow currency: "+currency)
             return
 
-        print(info['ticker']['last'])
+        return info['ticker']['last']
 
 
 #######################
 #        MAIN         #
 #######################
 m = Market("api.allcoin.com", "", "")
-m.last_price("btc")
-m.last_price("hpb")
+print(m.last_price("btc"))
+print(m.last_price("hpb"))
