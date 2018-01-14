@@ -95,7 +95,7 @@ class Market:
             info = self.currency_info(coin, "usd")
         elif coin in alt_coins:
             info = self.currency_info(coin, "btc")
-        print(info['ticker']['sell'])
+        print(info['ticker']['last'])
 
 
 #######################
