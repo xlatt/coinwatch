@@ -97,7 +97,7 @@ class Market:
             info = self.currency_info(currency, "btc")
         else:
             print("Unknow currency: "+currency)
-            return
+            return None
 
         return info['ticker']['last']
 
@@ -106,5 +106,13 @@ class Market:
 #        MAIN         #
 #######################
 m = Market("api.allcoin.com", "", "")
-print(m.last_price("btc"))
-print(m.last_price("hpb"))
+
+p = m.last_price("btc")
+if p:
+    print(p)
+
+p = m.last_price("hpb")
+if p:
+    print(p)
+
+m.last_price("dfsdf")
